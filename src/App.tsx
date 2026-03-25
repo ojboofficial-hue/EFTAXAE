@@ -58,7 +58,7 @@ export default function App() {
                     <Route 
                       path="/corporate-tax" 
                       element={
-                        <RoleGuard allowedRoles={['corporate', 'agent']}>
+                        <RoleGuard allowedRoles={['corporate', 'agent', 'admin']}>
                           <CorporateTax />
                         </RoleGuard>
                       } 
@@ -66,7 +66,7 @@ export default function App() {
                     <Route 
                       path="/corporate-tax/new" 
                       element={
-                        <RoleGuard allowedRoles={['corporate', 'agent']}>
+                        <RoleGuard allowedRoles={['corporate', 'agent', 'admin']}>
                           <NewCorporateTaxReturn />
                         </RoleGuard>
                       } 

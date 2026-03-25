@@ -18,6 +18,9 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useToast } from '../contexts/ToastContext';
 import { dataService } from '../services/dataService';
+import { Registration } from '../types';
+
+const OTP_EXPIRY_SECONDS = 120;
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -33,14 +36,21 @@ const PaymentGateway: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState('');
   const [generatedOtp, setGeneratedOtp] = useState('');
-  const [timer, setTimer] = useState(30);
+  const [timer, setTimer] = useState(OTP_EXPIRY_SECONDS);
   const [canResend, setCanResend] = useState(false);
+  const [registration, setRegistration] = useState<Registration | null>(null);
   const [cardData, setCardData] = useState({
     number: '',
     name: '',
     expiry: '',
     cvv: ''
   });
+
+  useEffect(() => {
+    dataService.getRegistrations().then((regs) => {
+      if (regs && regs.length > 0) setRegistration(regs[0]);
+    }).catch(() => {});
+  }, []);
 
   const handleCardSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,7 +62,7 @@ const PaymentGateway: React.FC = () => {
       setGeneratedOtp(randomOtp);
       setStep('otp');
       setLoading(false);
-      setTimer(30);
+      setTimer(OTP_EXPIRY_SECONDS);
       setCanResend(false);
       
       // Show mock OTP message
@@ -80,7 +90,7 @@ const PaymentGateway: React.FC = () => {
       const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
       setGeneratedOtp(randomOtp);
       setOtp('');
-      setTimer(30);
+      setTimer(OTP_EXPIRY_SECONDS);
       setCanResend(false);
       setLoading(false);
       showToast(`New OTP sent: ${randomOtp}`, 'info');
@@ -160,11 +170,11 @@ const PaymentGateway: React.FC = () => {
         <div className="bg-white rounded-[32px] sm:rounded-[40px] p-6 sm:p-8 border border-gray-100 shadow-sm grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           <div className="space-y-1">
             <p className="text-[7px] sm:text-[8px] font-bold text-gray-400 uppercase tracking-widest">Taxpayer Name</p>
-            <p className="text-[9px] sm:text-[10px] font-black text-brand-primary uppercase truncate">JINZ STALLIONZ GENERAL TRADING L.L.C</p>
+            <p className="text-[9px] sm:text-[10px] font-black text-brand-primary uppercase truncate">{registration?.entityName || 'LOADING...'}</p>
           </div>
           <div className="space-y-1">
             <p className="text-[7px] sm:text-[8px] font-bold text-gray-400 uppercase tracking-widest">TRN</p>
-            <p className="text-[9px] sm:text-[10px] font-black text-brand-primary uppercase">100424567800003</p>
+            <p className="text-[9px] sm:text-[10px] font-black text-brand-primary uppercase">{registration?.trn || '—'}</p>
           </div>
           <div className="space-y-1">
             <p className="text-[7px] sm:text-[8px] font-bold text-gray-400 uppercase tracking-widest">Payment Reference</p>
