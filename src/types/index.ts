@@ -1,17 +1,30 @@
 export type UserRole = 'corporate' | 'person' | 'agent' | 'admin';
 
+export interface Company {
+  id: string;
+  name: string;
+  email: string;
+  trn?: string;
+  status: 'Active' | 'Inactive' | 'Suspended';
+  createdAt: string;
+  createdBy: string;
+}
+
 export interface UserProfile {
   id: string;
   username: string;
   email: string;
   displayName?: string;
   role: UserRole;
+  companyId: string;
+  company?: Company;
   createdAt: string;
 }
 
 export interface Registration {
   id: string;
   userId: string;
+  companyId: string;
   taxType: 'VAT' | 'Corporate Tax' | 'Excise Tax';
   trn: string;
   status: 'Active' | 'Pending' | 'Suspended';
@@ -22,6 +35,7 @@ export interface Registration {
 export interface VATReturn {
   id: string;
   userId: string;
+  companyId: string;
   period: string;
   dueDate: string;
   status: 'Filed' | 'Draft' | 'Overdue' | 'Submitted';
@@ -38,6 +52,7 @@ export interface VATReturn {
 export interface Document {
   id: string;
   userId: string;
+  companyId: string;
   vatReturnId: string;
   fileName: string;
   fileType: string;
@@ -49,6 +64,7 @@ export interface Document {
 export interface CorporateTaxReturn {
   id: string;
   userId: string;
+  companyId: string;
   accountingPeriod: string;
   taxableIncome: number;
   taxAmount: number;
@@ -61,6 +77,7 @@ export interface CorporateTaxReturn {
 export interface Correspondence {
   id: string;
   userId: string;
+  companyId: string;
   subject: string;
   type: 'Message' | 'Certificate' | 'NOC' | 'Audit';
   status: 'Unread' | 'Read' | 'Resolved';
@@ -71,6 +88,7 @@ export interface Correspondence {
 export interface Payment {
   id: string;
   userId: string;
+  companyId: string;
   amount: number;
   type: string;
   status: 'Paid' | 'Outstanding' | 'Processing';

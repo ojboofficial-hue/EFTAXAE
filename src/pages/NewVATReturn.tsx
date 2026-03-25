@@ -245,6 +245,16 @@ const NewVATReturn: React.FC = () => {
     </div>
   );
 
+  // Auto-redirect to payment selection after submission
+  useEffect(() => {
+    if (submittedData) {
+      const timer = setTimeout(() => {
+        navigate('/payment-selection', { state: { amount: submittedData.netVAT, reference: submittedData.formData?.vatRef } });
+      }, 2000); // 2 seconds delay
+      return () => clearTimeout(timer);
+    }
+  }, [submittedData, navigate]);
+
   if (submittedData) {
     return (
       <div className="flex flex-col min-h-full bg-brand-surface">
@@ -258,12 +268,11 @@ const NewVATReturn: React.FC = () => {
               <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-emerald-500/20">
                 <CheckCircle2 size={48} />
               </div>
-              
               <div className="space-y-2">
                 <h3 className="text-3xl font-black text-brand-primary uppercase tracking-tight">Submission Successful</h3>
                 <p className="text-sm text-gray-500 font-medium">Your VAT 201 Return has been submitted to the Federal Tax Authority.</p>
+                <p className="text-xs text-brand-accent font-bold mt-2">Redirecting to payment options...</p>
               </div>
-
               <div className="w-full bg-gray-50 rounded-3xl p-8 space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Reference Number</span>
@@ -278,7 +287,6 @@ const NewVATReturn: React.FC = () => {
                   <span className="text-xs font-black text-brand-primary uppercase">{new Date().toLocaleDateString()}</span>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
                 <button 
                   onClick={() => generateVAT201PDF(submittedData)}
@@ -293,7 +301,6 @@ const NewVATReturn: React.FC = () => {
                   Proceed to Payment <ArrowRight size={20} />
                 </button>
               </div>
-
               <button 
                 onClick={() => navigate('/vat/my-filings')}
                 className="text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-brand-primary transition-colors"

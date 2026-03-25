@@ -44,6 +44,7 @@ const CorporateTax: React.FC = () => {
       setRecentReturns(returns.map((r: any) => ({
         id: r.id,
         userId: r.userId,
+        companyId: r.companyId || user.companyId,
         accountingPeriod: r.period,
         taxableIncome: r.formData?.taxableIncome || 0,
         taxAmount: r.netTax,
