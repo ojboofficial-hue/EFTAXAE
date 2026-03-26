@@ -430,10 +430,26 @@ const Dashboard: React.FC = () => {
             </h1>
             <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] sm:text-xs">Authority Dashboard &bull; {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
           </div>
-          <button className="btn-primary w-full sm:w-auto justify-center">
-            <Briefcase size={20} />
-            New Taxable Person
-          </button>
+          <div className="flex gap-4">
+            <button 
+              onClick={async () => {
+                try {
+                  await dataService.seedData();
+                  showToast('Demo data seeded successfully!', 'success');
+                  window.location.reload();
+                } catch (error) {
+                  showToast('Failed to seed data.', 'error');
+                }
+              }}
+              className="px-6 py-3 bg-brand-surface border border-brand-accent text-brand-accent rounded-xl text-xs font-black uppercase tracking-widest hover:bg-brand-accent hover:text-white transition-all shadow-sm"
+            >
+              Seed Demo Data
+            </button>
+            <button className="btn-primary w-full sm:w-auto justify-center">
+              <Briefcase size={20} />
+              New Taxable Person
+            </button>
+          </div>
         </div>
 
         {/* Global Stats Grid */}

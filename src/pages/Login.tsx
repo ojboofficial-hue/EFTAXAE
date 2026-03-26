@@ -11,13 +11,26 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { login, register, user, loading } = useAuth();
+  const { login, register, loginWithGoogle, user, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && user) {
       navigate('/');
     }
   }, [user, loading, navigate]);
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setIsLoading(true);
+    try {
+      await loginWithGoogle();
+      navigate('/');
+    } catch (err: any) {
+      console.error('Google Auth error:', err);
+      setError(err.message || 'An error occurred during Google authentication.');
+      setIsLoading(false);
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,6 +157,17 @@ const Login: React.FC = () => {
               <ArrowRight size={18} className="ml-auto text-white/30 group-hover:text-[#B8860B] group-hover:translate-x-1 transition-all" />
             </button>
 
+            <div className="mt-4">
+              <button 
+                type="button"
+                onClick={handleGoogleLogin}
+                className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm"
+              >
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
+                Sign in with Google
+              </button>
+            </div>
+
             <div className="text-center mt-4">
               <button 
                 type="button"
@@ -169,29 +193,13 @@ const Login: React.FC = () => {
             <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-3">
               <div className="flex gap-3">
                 <Shield className="text-blue-600 shrink-0" size={20} />
-                <p className="text-[11px] text-blue-700 font-bold uppercase tracking-wider">Demo Accounts Available</p>
+                <p className="text-[11px] text-blue-700 font-bold uppercase tracking-wider">Cloud Database Enabled</p>
               </div>
-              <div className="grid grid-cols-2 gap-2 text-[10px] text-blue-800">
-                <div className="bg-white/50 p-2 rounded border border-blue-100">
-                  <p className="font-bold">Admin Portal</p>
-                  <p>User: admin</p>
-                  <p>Pass: admin</p>
-                </div>
-                <div className="bg-white/50 p-2 rounded border border-blue-100">
-                  <p className="font-bold">Company 1</p>
-                  <p>User: company1</p>
-                  <p>Pass: password123</p>
-                </div>
-                <div className="bg-white/50 p-2 rounded border border-blue-100">
-                  <p className="font-bold">Company 2</p>
-                  <p>User: company2</p>
-                  <p>Pass: password123</p>
-                </div>
-                <div className="bg-white/50 p-2 rounded border border-blue-100">
-                  <p className="font-bold">Company 3</p>
-                  <p>User: company3</p>
-                  <p>Pass: password123</p>
-                </div>
+              <div className="text-[10px] text-blue-800 space-y-2">
+                <p>This application is now powered by Firebase. Please register a new account to get started.</p>
+                <p className="font-bold">Note for Email/Password login:</p>
+                <p>If you see "operation-not-allowed", you must enable the "Email/Password" provider in the Firebase Console under Authentication &gt; Sign-in method.</p>
+                <p>Alternatively, use the "Sign in with Google" button below which is enabled by default.</p>
               </div>
             </div>
           </form>
