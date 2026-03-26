@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               <UserIcon size={12} />
             </div>
             <span className="text-[10px] font-bold truncate max-w-[100px] lg:max-w-[150px]">
-              {user?.email}
+              {user?.displayName || user?.email}
             </span>
             <ChevronDown size={10} className="text-gray-400 group-hover:text-black" />
           </div>

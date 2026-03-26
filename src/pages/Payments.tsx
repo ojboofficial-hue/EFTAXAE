@@ -30,7 +30,10 @@ const PaymentsPage: React.FC = () => {
 
   useEffect(() => {
     const fetchPayments = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       try {
         const data = await dataService.getPayments();
         // Only show non-outstanding payments

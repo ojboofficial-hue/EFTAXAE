@@ -24,7 +24,10 @@ const VATRefund: React.FC = () => {
 
   useEffect(() => {
     const fetchRefunds = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       try {
         const data = await dataService.getVATRefunds();
         setRefunds(data);

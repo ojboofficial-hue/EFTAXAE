@@ -45,7 +45,10 @@ const VATReporting: React.FC = () => {
 
   useEffect(() => {
     const fetchFilings = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       try {
         const data = await dataService.getVATReturns();
         setFilings(data);

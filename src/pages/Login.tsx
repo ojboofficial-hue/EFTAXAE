@@ -194,32 +194,30 @@ const Login: React.FC = () => {
                   </div>
                 </div>
 
-                <button 
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-[#0A192F] text-white rounded-xl font-bold hover:bg-black transition-all shadow-lg group mt-6 disabled:opacity-50"
-                >
-                  {isLoading ? <Loader2 className="animate-spin" size={18} /> : <>
-                    Sign In <ArrowRight size={18} className="ml-auto text-white/30 group-hover:text-[#B8860B] group-hover:translate-x-1 transition-all" />
-                  </>}
-                </button>
-              </form>
+            <button 
+              type="submit"
+              className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-[#0A192F] text-white rounded-xl font-bold hover:bg-black transition-all shadow-lg group mt-6"
+            >
+              {isLogin ? 'Sign In to Portal' : 'Register Account'}
+              <ArrowRight size={18} className="ml-auto text-white/30 group-hover:text-[#B8860B] group-hover:translate-x-1 transition-all" />
+            </button>
 
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 flex gap-3 mt-6">
-                <Shield className="text-blue-600 shrink-0" size={20} />
-                <p className="text-[11px] text-blue-700 leading-relaxed">
-                  Default Credentials: <strong>admin</strong> / <strong>admin</strong>
-                </p>
-              </div>
-            </>
-          )}
+            <div className="text-center mt-4">
+              <button 
+                type="button"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setError('');
+                }}
+                className="text-sm text-gray-500 hover:text-[#B8860B] font-medium transition-colors"
+              >
+                {isLogin ? "Don't have an account? Register here" : "Already have an account? Sign in"}
+              </button>
+            </div>
 
-          {/* REGISTER TAB */}
-          {tab === 'register' && (
-            <>
-              <div className="text-center mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Create Account</h2>
-                <p className="text-sm text-gray-500">Register for your company</p>
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-100"></div>
               </div>
 
               {error && (
@@ -357,22 +355,13 @@ const Login: React.FC = () => {
                   />
                 </div>
 
-                <button 
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-[#0A192F] text-white rounded-xl font-bold hover:bg-black transition-all shadow-lg group mt-6 disabled:opacity-50"
-                >
-                  {isLoading ? <Loader2 className="animate-spin" size={18} /> : <>
-                    <Plus size={18} /> Register Company
-                  </>}
-                </button>
-              </form>
-
-              <p className="text-xs text-gray-500 text-center mt-4">
-                After registering, you can create user accounts for this company.
+            <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 flex gap-3">
+              <Shield className="text-blue-600 shrink-0" size={20} />
+              <p className="text-[11px] text-blue-700 leading-relaxed">
+                Use your official credentials. For first time setup, use <strong>admin</strong> / <strong>admin</strong> to access the dashboard.
               </p>
-            </>
-          )}
+            </div>
+          </form>
         </div>
 
         <div className="p-6 bg-gray-50 border-t text-center">

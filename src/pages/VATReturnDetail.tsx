@@ -35,7 +35,10 @@ const VATReturnDetail: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!id) return;
+      if (!id) {
+        setLoading(false);
+        return;
+      }
       
       try {
         const data = await dataService.getVATReturn(id);
@@ -318,11 +321,11 @@ const VATReturnDetail: React.FC = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-[9px] font-bold text-gray-400 uppercase">Name</label>
-                      <p className="text-[11px] font-bold text-[#0A192F]">MOHAMMAD SHAFIULALAM VEGETABLES AND FRUITS TRADING L.L.C</p>
+                      <p className="text-[11px] font-bold text-[#0A192F]">{user?.displayName || 'Taxable Person'}</p>
                     </div>
                     <div>
                       <label className="block text-[9px] font-bold text-gray-400 uppercase">TRN</label>
-                      <p className="text-[11px] font-bold text-[#0A192F]">{returnDetails.vatRef || '100234567890003'}</p>
+                      <p className="text-[11px] font-bold text-[#0A192F]">{returnDetails.vatRef?.split('-')[1] || returnDetails.vatRef || 'N/A'}</p>
                     </div>
                     <div className="sm:col-span-2">
                       <label className="block text-[9px] font-bold text-gray-400 uppercase">Address</label>

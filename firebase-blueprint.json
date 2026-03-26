@@ -1,0 +1,156 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "Stores basic user information and roles.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique user ID (matches Auth UID)" },
+        "username": { "type": "string", "description": "Display username" },
+        "email": { "type": "string", "format": "email", "description": "User email address" },
+        "displayName": { "type": "string", "description": "Full name or entity name" },
+        "role": { "type": "string", "enum": ["corporate", "person", "agent", "admin"], "description": "User access level" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation timestamp" }
+      },
+      "required": ["id", "username", "email", "role"]
+    },
+    "vat_returns": {
+      "title": "VAT Return",
+      "description": "VAT filing records.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "status": { "type": "string", "enum": ["Filed", "Draft", "Overdue", "Submitted"] },
+        "period": { "type": "string" },
+        "vatRef": { "type": "string" },
+        "periodFrom": { "type": "string" },
+        "periodTo": { "type": "string" },
+        "taxYearEnd": { "type": "string" },
+        "totalSales": { "type": "number" },
+        "totalVAT": { "type": "number" },
+        "totalExpenses": { "type": "number" },
+        "totalRecoverableVAT": { "type": "number" },
+        "netVAT": { "type": "number" },
+        "dueDate": { "type": "string" },
+        "filedAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "formData": { "type": "object" }
+      },
+      "required": ["userId", "status", "period"]
+    },
+    "payments": {
+      "title": "Payment Record",
+      "description": "Tax payment records.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["Paid", "Outstanding", "Processing"] },
+        "dueDate": { "type": "string" },
+        "paidAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "amount", "status"]
+    },
+    "corporate_tax_returns": {
+      "title": "Corporate Tax Return",
+      "description": "Corporate tax filing records.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "status": { "type": "string", "enum": ["Filed", "Draft", "Overdue", "Submitted"] },
+        "period": { "type": "string" },
+        "netTax": { "type": "number" },
+        "dueDate": { "type": "string" },
+        "filedAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "formData": { "type": "object" }
+      },
+      "required": ["userId", "status", "period"]
+    },
+    "correspondence": {
+      "title": "Correspondence",
+      "description": "Messages and notifications from the authority.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "subject": { "type": "string" },
+        "fromName": { "type": "string" },
+        "date": { "type": "string" },
+        "type": { "type": "string", "enum": ["Message", "Certificate", "NOC", "Audit"] },
+        "status": { "type": "string", "enum": ["Unread", "Read", "Resolved"] },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "subject", "status"]
+    },
+    "registrations": {
+      "title": "Tax Registration",
+      "description": "Active tax registrations for entities.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "taxType": { "type": "string", "enum": ["VAT", "Corporate Tax", "Excise Tax"] },
+        "trn": { "type": "string" },
+        "status": { "type": "string", "enum": ["Active", "Pending", "Suspended"] },
+        "effectiveDate": { "type": "string" },
+        "entityName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "taxType", "trn", "status"]
+    },
+    "documents": {
+      "title": "Document",
+      "description": "Uploaded documents related to filings.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "vatReturnId": { "type": "string" },
+        "fileName": { "type": "string" },
+        "fileType": { "type": "string" },
+        "fileData": { "type": "string", "description": "Base64 encoded file data" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "vatReturnId", "fileName"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User profile documents."
+    },
+    "/vat_returns/{returnId}": {
+      "schema": "vat_returns",
+      "description": "VAT return documents."
+    },
+    "/payments/{paymentId}": {
+      "schema": "payments",
+      "description": "Payment record documents."
+    },
+    "/corporate_tax_returns/{returnId}": {
+      "schema": "corporate_tax_returns",
+      "description": "Corporate tax return documents."
+    },
+    "/correspondence/{msgId}": {
+      "schema": "correspondence",
+      "description": "Correspondence documents."
+    },
+    "/registrations/{regId}": {
+      "schema": "registrations",
+      "description": "Tax registration documents."
+    },
+    "/documents/{docId}": {
+      "schema": "documents",
+      "description": "Document metadata and storage."
+    }
+  }
+}

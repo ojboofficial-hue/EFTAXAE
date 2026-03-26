@@ -29,20 +29,41 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const navItems = [
     { name: 'HOME', path: '/', icon: Home },
     { name: 'VAT', path: '/vat', icon: FileText },
     { name: 'EXCISE TAX', path: '/excise-tax', icon: ShieldCheck },
-    { name: 'CORPORATE TAX', path: '/corporate-tax', icon: Briefcase },
+    { 
+      name: 'CORPORATE TAX', 
+      path: '/corporate-tax', 
+      icon: Briefcase,
+      roles: ['corporate', 'agent', 'admin']
+    },
     { name: 'MY PAYMENTS', path: '/payments', icon: CreditCard },
     { name: 'MY CORRESPONDENCE', path: '/correspondence', icon: Mail },
-    { name: 'USER AUTHORIZATION', path: '/user-authorization', icon: User },
-    { name: 'MY AUDIT', path: '/audit', icon: FileSearch },
+    { 
+      name: 'USER AUTHORIZATION', 
+      path: '/user-authorization', 
+      icon: User,
+      roles: ['agent', 'admin']
+    },
+    { 
+      name: 'MY AUDIT', 
+      path: '/audit', 
+      icon: FileSearch,
+      roles: ['agent', 'admin']
+    },
     { name: 'OTHER SERVICES', path: '/other-services', icon: LayoutGrid },
     { name: 'E-INVOICING', path: '/e-invoicing', icon: FileText },
   ];
+
+  const filteredNavItems = navItems.filter(item => {
+    if (!item.roles) return true;
+    if (!user) return false;
+    return item.roles.includes(user.role);
+  });
 
   return (
     <aside className="w-full h-full bg-brand-primary text-white flex flex-col shrink-0 shadow-2xl z-20 overflow-hidden">
@@ -66,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
       </div>
 
       <nav className="flex-1 py-6 space-y-1 overflow-y-auto px-3 scrollbar-hide">
-        {navItems.map((item) => (
+        {filteredNavItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}

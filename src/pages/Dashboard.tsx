@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -35,45 +35,30 @@ const Dashboard: React.FC = () => {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [selectedEntity, setSelectedEntity] = useState<any | null>(null);
-  const [recentFilings, setRecentFilings] = useState<any[]>([]);
-  const [registrations, setRegistrations] = useState<any[]>([]);
+  const [allFilings, setAllFilings] = useState<any[]>([]);
+  const [allRegistrations, setAllRegistrations] = useState<any[]>([]);
+  const [allPayments, setAllPayments] = useState<any[]>([]);
+  const [allCorrespondence, setAllCorrespondence] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [stats, setStats] = useState([
-    { label: 'Pending Returns', value: '0', icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },
-    { label: 'Total VAT Paid', value: 'AED 0', icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-    { label: 'Active TRNs', value: '0', icon: ShieldCheck, color: 'text-blue-500', bg: 'bg-blue-50' },
-    { label: 'Compliance Score', value: '98%', icon: Activity, color: 'text-indigo-500', bg: 'bg-indigo-50' },
-  ]);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       try {
-        const [filings, regs, payments] = await Promise.all([
+        const [filings, regs, payments, correspondence] = await Promise.all([
           dataService.getVATReturns(),
           dataService.getRegistrations(),
-          dataService.getPayments()
+          dataService.getPayments(),
+          dataService.getCorrespondence()
         ]);
 
-        const sorted = filings.sort((a: any, b: any) => 
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        ).slice(0, 5);
-        setRecentFilings(sorted);
-        setRegistrations(regs);
-
-        // Calculate stats
-        const pendingCount = filings.filter((f: any) => f.status === 'Overdue' || f.status === 'Draft').length;
-        const totalPaid = payments
-          .filter((p: any) => p.status === 'Paid' && p.type === 'VAT Payment')
-          .reduce((acc: number, curr: any) => acc + curr.amount, 0);
-
-        setStats([
-          { label: 'Pending Returns', value: pendingCount.toString(), icon: Clock, color: 'text-amber-500', bg: 'bg-amber-50' },
-          { label: 'Total VAT Paid', value: `AED ${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-          { label: 'Active TRNs', value: regs.length.toString(), icon: ShieldCheck, color: 'text-blue-500', bg: 'bg-blue-50' },
-          { label: 'Compliance Score', value: '98%', icon: Activity, color: 'text-indigo-500', bg: 'bg-indigo-50' },
-        ]);
+        setAllFilings(filings);
+        setAllRegistrations(regs);
+        setAllPayments(payments);
+        setAllCorrespondence(correspondence);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -83,6 +68,121 @@ const Dashboard: React.FC = () => {
 
     fetchData();
   }, [user]);
+
+  const stats = useMemo(() => {
+    const filteredFilings = selectedEntity 
+      ? allFilings.filter(f => f.vatRef === selectedEntity.trn)
+      : allFilings;
+    
+    const filteredPayments = selectedEntity
+      ? allPayments.filter(p => p.userId === selectedEntity.userId)
+      : allPayments;
+
+    const filteredCorrespondence = selectedEntity
+      ? allCorrespondence.filter(c => c.userId === selectedEntity.userId)
+      : allCorrespondence;
+
+    const pendingCount = filteredFilings.filter((f: any) => f.status === 'Overdue' || f.status === 'Draft').length;
+    const totalPaid = filteredPayments
+      .filter((p: any) => p.status === 'Paid')
+      .reduce((acc: number, curr: any) => acc + curr.amount, 0);
+
+    const activeRegs = selectedEntity 
+      ? (selectedEntity.status === 'Active' ? 1 : 0)
+      : allRegistrations.filter(r => r.status === 'Active').length;
+
+    const refundRequests = filteredFilings.filter((f: any) => f.formData?.refundRequest === 'Yes').length;
+    const auditCases = filteredCorrespondence.filter((c: any) => c.type === 'Audit').length;
+    const totalRevenue = filteredFilings.reduce((acc: number, curr: any) => acc + (curr.totalSales || 0), 0);
+
+    if (selectedEntity) {
+      return [
+        { 
+          label: 'Pending Returns', 
+          value: pendingCount.toString(), 
+          icon: Clock, 
+          color: 'text-amber-500', 
+          bg: 'bg-amber-50' 
+        },
+        { 
+          label: 'Total VAT Paid', 
+          value: `AED ${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+          icon: TrendingUp, 
+          color: 'text-emerald-500', 
+          bg: 'bg-emerald-50' 
+        },
+        { 
+          label: 'Active TRNs', 
+          value: activeRegs.toString(), 
+          icon: ShieldCheck, 
+          color: 'text-blue-500', 
+          bg: 'bg-blue-50' 
+        },
+        { 
+          label: 'Compliance Score', 
+          value: '98%', 
+          icon: Activity, 
+          color: 'text-indigo-500', 
+          bg: 'bg-indigo-50' 
+        },
+      ];
+    }
+
+    return [
+      { 
+        label: 'Total Tax Collected', 
+        value: `AED ${totalPaid.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`, 
+        icon: TrendingUp, 
+        color: 'text-emerald-500', 
+        bg: 'bg-emerald-50' 
+      },
+      { 
+        label: 'Active Registrations', 
+        value: activeRegs.toString(), 
+        icon: ShieldCheck, 
+        color: 'text-blue-500', 
+        bg: 'bg-blue-50' 
+      },
+      { 
+        label: 'Refund Requests', 
+        value: refundRequests.toString(), 
+        icon: FileText, 
+        color: 'text-amber-500', 
+        bg: 'bg-amber-50' 
+      },
+      { 
+        label: 'Open Audit Cases', 
+        value: auditCases.toString(), 
+        icon: AlertCircle, 
+        color: 'text-red-500', 
+        bg: 'bg-red-50' 
+      },
+      { 
+        label: 'Total Revenue Base', 
+        value: `AED ${(totalRevenue / 1000000).toFixed(1)}M`, 
+        icon: Activity, 
+        color: 'text-indigo-500', 
+        bg: 'bg-indigo-50' 
+      },
+      { 
+        label: 'Pending Filings', 
+        value: pendingCount.toString(), 
+        icon: Clock, 
+        color: 'text-amber-500', 
+        bg: 'bg-amber-50' 
+      },
+    ];
+  }, [selectedEntity, allFilings, allPayments, allRegistrations, allCorrespondence]);
+
+  const recentFilings = useMemo(() => {
+    const filtered = selectedEntity 
+      ? allFilings.filter(f => f.vatRef === selectedEntity.trn)
+      : allFilings;
+    
+    return filtered.sort((a: any, b: any) => 
+      new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
+    ).slice(0, 5);
+  }, [selectedEntity, allFilings]);
 
   const chartData = [
     { name: 'Jan', value: 4000 },
@@ -330,10 +430,48 @@ const Dashboard: React.FC = () => {
             </h1>
             <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px] sm:text-xs">Authority Dashboard &bull; {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
           </div>
-          <button className="btn-primary w-full sm:w-auto justify-center">
-            <Briefcase size={20} />
-            New Taxable Person
-          </button>
+          <div className="flex gap-4">
+            <button 
+              onClick={async () => {
+                try {
+                  await dataService.seedData();
+                  showToast('Demo data seeded successfully!', 'success');
+                  window.location.reload();
+                } catch (error) {
+                  showToast('Failed to seed data.', 'error');
+                }
+              }}
+              className="px-6 py-3 bg-brand-surface border border-brand-accent text-brand-accent rounded-xl text-xs font-black uppercase tracking-widest hover:bg-brand-accent hover:text-white transition-all shadow-sm"
+            >
+              Seed Demo Data
+            </button>
+            <button className="btn-primary w-full sm:w-auto justify-center">
+              <Briefcase size={20} />
+              New Taxable Person
+            </button>
+          </div>
+        </div>
+
+        {/* Global Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6">
+          {stats.map((stat, idx) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all group"
+            >
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <div className={cn("p-2 sm:p-3 rounded-xl transition-colors", stat.bg)}>
+                  <stat.icon className={stat.color} size={20} />
+                </div>
+                <ArrowUpRight className="text-gray-300 group-hover:text-brand-accent transition-colors" size={18} />
+              </div>
+              <p className="text-xl sm:text-2xl font-black text-brand-primary mb-1">{stat.value}</p>
+              <p className="text-[9px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-widest">{stat.label}</p>
+            </motion.div>
+          ))}
         </div>
 
         {/* Search & Filter */}
@@ -367,7 +505,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
-            {registrations.map((reg) => (
+            {allRegistrations.map((reg) => (
               <motion.div 
                 key={reg.id}
                 whileHover={{ y: -8 }}

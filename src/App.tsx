@@ -72,8 +72,22 @@ export default function App() {
                       } 
                     />
                     <Route path="/excise-tax" element={<ExciseTax />} />
-                    <Route path="/user-authorization" element={<UserAuthorization />} />
-                    <Route path="/audit" element={<Audit />} />
+                    <Route 
+                      path="/user-authorization" 
+                      element={
+                        <RoleGuard allowedRoles={['agent', 'admin']}>
+                          <UserAuthorization />
+                        </RoleGuard>
+                      } 
+                    />
+                    <Route 
+                      path="/audit" 
+                      element={
+                        <RoleGuard allowedRoles={['agent', 'admin']}>
+                          <Audit />
+                        </RoleGuard>
+                      } 
+                    />
                     <Route path="/e-invoicing" element={<EInvoicing />} />
                     <Route path="/correspondence" element={<Correspondence />} />
                     <Route path="/payments" element={<Payments />} />

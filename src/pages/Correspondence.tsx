@@ -21,7 +21,10 @@ const CorrespondencePage: React.FC = () => {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       try {
         const data = await dataService.getCorrespondence();
         setMessages(data);
